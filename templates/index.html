@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Upload CSV and Process Emails</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/upload" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="api_key" class="form-label">Apollo API Key</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="api_key" name="api_key" value="{{ saved_api_key }}" required>
+                            <button class="btn btn-outline-secondary" type="button" id="showApiKey">Show</button>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="save_api_key" name="save_api_key" {% if has_saved_key %}checked{% endif %}>
+                            <label class="form-check-label" for="save_api_key">
+                                Save API key for future use
+                            </label>
+                        </div>
+                        <div class="form-text">Enter your Apollo.io API key</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="file" class="form-label">CSV File</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                        <div class="form-text">Upload a CSV file with columns: First Name, Last Name, LinkedIn URL, Company Name, Company Website</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Upload and Process</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <a href="/history" class="btn btn-outline-secondary w-100">View Processing History</a>
+            </div>
+            <div class="col-md-6">
+                <a href="/processing" class="btn btn-outline-info w-100">View Current Processing</a>
+            </div>
+        </div>
+
+        {% if logs %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Logs</h5>
+            </div>
+            <div class="card-body">
+                <div class="log-container">
+                    {% for log in logs[-10:] %}
+                        <div class="log-entry">{{ log }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.getElementById('showApiKey').addEventListener('click', function() {
+        const apiKeyInput = document.getElementById('api_key');
+        const button = this;
+        
+        if (apiKeyInput.type === 'password') {
+            // Show the current API key in the input field
+            const currentApiKey = apiKeyInput.value;
+            if (currentApiKey) {
+                apiKeyInput.type = 'text';
+                button.textContent = 'Hide';
+            } else {
+                alert('Please enter an API key first');
+            }
+        } else {
+            apiKeyInput.type = 'password';
+            button.textContent = 'Show';
+        }
+    });
+</script>
+{% endblock %}

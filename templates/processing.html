@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Processing CSV File</h4>
+                <a href="/" class="btn btn-secondary btn-sm">Back to Upload</a>
+            </div>
+            <div class="card-body">
+                <div class="log-container" id="logContainer">
+                    {% for log in logs %}
+                        <div class="log-entry">{{ log }}</div>
+                    {% endfor %}
+                </div>
+                <div class="mt-3 text-center" id="processingIndicator">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Processing...</span>
+                    </div>
+                    <p class="mt-2">Processing in progress...</p>
+                </div>
+                <div class="mt-3 text-center d-none" id="downloadSection">
+                    <div class="alert alert-success">
+                        <h5>Processing Complete!</h5>
+                        <p>Your file is ready for download.</p>
+                        <a href="#" class="btn btn-success btn-lg" id="downloadButton">Download Results</a>
+                    </div>
+                </div>
+                <div class="mt-3 text-center d-none" id="errorSection">
+                    <div class="alert alert-danger">
+                        <h5>Processing Failed!</h5>
+                        <p id="errorMessage"></p>
+                        <a href="/" class="btn btn-primary">Try Again</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let downloadChecked = false;
+    
+    // Auto-refresh logs every 2 seconds
+    const logInterval = setInterval(function() {
+        fetch('/logs')
+            .then(response => response.json())
+            .then(data => {
+                const logContainer = document.getElementById('logContainer');
+                logContainer.innerHTML = '';
+                data.logs.forEach(log => {
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'log-entry';
+                    logEntry.textContent = log;
+                    logContainer.appendChild(logEntry);
+                });
+                logContainer.scrollTop = logContainer.scrollHeight;
+            })
+            .catch(error => console.error('Error fetching logs:', error));
+    }, 2000);
+    
+    // Check for download readiness every 3 seconds
+    const downloadInterval = setInterval(function() {
+        if (downloadChecked) return;
+        
+        fetch('/check_download')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    downloadChecked = true;
+                    clearInterval(logInterval);
+                    clearInterval(downloadInterval);
+                    
+                    // Hide processing indicator and show error section
+                    document.getElementById('processingIndicator').classList.add('d-none');
+                    const errorSection = document.getElementById('errorSection');
+                    document.getElementById('errorMessage').textContent = data.error_message;
+                    errorSection.classList.remove('d-none');
+                }
+                else if (data.ready) {
+                    downloadChecked = true;
+                    clearInterval(logInterval);
+                    clearInterval(downloadInterval);
+                    
+                    // Hide processing indicator and show download section
+                    document.getElementById('processingIndicator').classList.add('d-none');
+                    const downloadSection = document.getElementById('downloadSection');
+                    downloadSection.classList.remove('d-none');
+                    
+                    // Set download button href
+                    const downloadButton = document.getElementById('downloadButton');
+                    downloadButton.href = '/download/' + data.file;
+                    
+                    // Auto-download after 2 seconds
+                    setTimeout(function() {
+                        window.location.href = '/download/' + data.file;
+                    }, 2000);
+                }
+            })
+            .catch(error => console.error('Error checking download:', error));
+    }, 3000);
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Processing History</h4>
+                <a href="/" class="btn btn-secondary btn-sm">Back to Upload</a>
+            </div>
+            <div class="card-body">
+                {% if history %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Original File</th>
+                                <th>Output File</th>
+                                <th>Status</th>
+                                <th>Rows Processed</th>
+                                <th>Date & Time</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in history %}
+                            <tr>
+                                <td>{{ entry.original_filename }}</td>
+                                <td>{{ entry.output_filename }}</td>
+                                <td>
+                                    {% if entry.status == 'completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ entry.rows_processed }}</td>
+                                <td class="timestamp-cell" data-timestamp="{{ entry.timestamp }}">{{ entry.timestamp }}</td>
+                                <td>
+                                    {% if entry.status == 'completed' and entry.output_filename %}
+                                        <a href="/download/{{ entry.output_filename }}" class="btn btn-sm btn-primary">Download</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <p class="text-muted">No processing history found.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Format timestamps when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const timestampCells = document.querySelectorAll('.timestamp-cell');
+        timestampCells.forEach(function(cell) {
+            try {
+                const isoString = cell.getAttribute('data-timestamp');
+                if (isoString) {
+                    const date = new Date(isoString);
+                    cell.textContent = date.toLocaleString();
+                }
+            } catch (e) {
+                // Keep original text if parsing fails
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table th {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
