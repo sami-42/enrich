@@ -1,5 +1,5 @@
-numpy==1.26.2
+numpy==1.26.0
 pandas==2.0.3
 requests==2.32.0
-flask==2.3.5
+flask==2.3.4  # or any stable 2.3.x version
 gunicorn==21.2.0
