@@ -348,6 +348,9 @@ def history():
     processing_history = [entry for entry in history_data if entry.get('type') == 'processing']
     processing_history.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
     return render_template('history.html', history=processing_history)
-
+# For localhost
+""" if __name__ == '__main__':
+    app.run(debug=True) """
+# For Render.com deployment
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
