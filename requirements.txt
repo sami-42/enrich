@@ -1,5 +1,5 @@
-Flask==2.3.3
-pandas==2.0.3
-requests==2.31.0
-werkzeug==2.3.7
-gunicorn==21.2.0
+pandas==2.1.1
+numpy==1.26.2
+requests==2.32.0
+flask==2.3.5   # or your web framework
+gunicorn==21.2.0  # for deploying Flask/Django apps
